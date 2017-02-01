@@ -1,6 +1,7 @@
+import logging
 from os import environ
 import dataset
-import logging
+import countrynames
 
 from corpint.origin import Origin
 
@@ -26,7 +27,27 @@ class Project(object):
         return Origin(self, name)
 
     def emit_entity(self, data):
+        uid = data.get('uid') or data.get('uid_canonical')
+        if uid is None:
+            raise ValueError("No UID for entity: %r", data)
+
+        data['score'] = int(data.get('score', 0))
+
+        if 'jurisdiction' in data:
+            data['jurisdiction'] = countrynames.to_code(data['jurisdiction'])
+
+        aliases = data.pop('aliases', [])
         self.entities.upsert(data, ['origin', 'uid'])
+        for alias in aliases:
+            self.emit_alias({
+                'name': alias,
+                'origin': data.get('origin'),
+                'uid': data.get('uid'),
+                'uid_canonical': data.get('uid_canonical'),
+            })
+
+    def emit_alias(self, data):
+        self.aliases.upsert(data, ['origin', 'uid', 'name'])
 
     def flush(self):
         self.entities.drop()

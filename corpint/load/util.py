@@ -8,6 +8,5 @@ def get_uid(origin, *args):
     for arg in args:
         if arg is None:
             return None
-        arg = unicode(arg).encode('utf-8')
-        uid.update(uid)
+        uid.update(unicode(arg).encode('utf-8'))
     return uid.hexdigest()

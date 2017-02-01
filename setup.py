@@ -24,7 +24,8 @@ setup(
         'dataset>=0.8',
         'requests',
         'countrynames',
-        'fingerprints'
+        'fingerprints',
+        'unicodecsv'
     ],
     test_suite='nose.collector',
     entry_points={},

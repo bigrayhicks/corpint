@@ -14,10 +14,14 @@ class Origin(object):
         data['origin'] = self.name
         self.project.emit_entity(data)
 
+    def emit_alias(self, data):
+        data['origin'] = self.name
+        self.project.emit_alias(data)
+
     def clear(self):
-        self.entities.delete(origin=self.name)
-        self.aliases.delete(origin=self.name)
-        self.links.delete(origin=self.name)
+        self.project.entities.delete(origin=self.name)
+        self.project.aliases.delete(origin=self.name)
+        self.project.links.delete(origin=self.name)
 
     def __repr__(self):
         return '<Origin(%r, %r)>' % (self.project, self.name)
