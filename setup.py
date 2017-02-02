@@ -25,7 +25,9 @@ setup(
         'requests',
         'countrynames',
         'fingerprints',
-        'unicodecsv'
+        'unicodecsv',
+        'python-Levenshtein',
+        'click'
     ],
     test_suite='nose.collector',
     entry_points={},

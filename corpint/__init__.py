@@ -10,4 +10,5 @@ def project(prefix):
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     logging.basicConfig(level=logging.INFO)
     logging.getLogger('requests').setLevel(logging.WARNING)
+    logging.getLogger('alembic').setLevel(logging.WARNING)
     return Project(prefix)
