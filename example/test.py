@@ -12,7 +12,7 @@ origin.emit_entity({
     'type': 'Person',
     'name': 'Damian Calderbank',
     'aliases': ['Damian James Calderbank', 'Damian J. Calderbank'],
-    'score': 5,
+    'weight': 5,
     'jurisdiction': 'United Kingdom'
 })
 
@@ -25,4 +25,4 @@ with open(path.join(path.dirname(__file__), 'test.csv')) as fh:
         origin.emit_entity(entity)
 
 log.info("Data integration...")
-project.integrate()
+project.integrate(auto_match=True)

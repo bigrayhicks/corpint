@@ -1,5 +1,6 @@
-from corpint.integration.similarity import entity_similarity
-from corpint.integration.util import sorttuple
+from corpint.integrate.similarity import entity_similarity
+from corpint.integrate.util import sorttuple, merkle
+from corpint.integrate.merge import merge_entity
 
 # TODO: this code is a hacky mess. perhaps replace it with datamade's dedupe?
 
@@ -11,7 +12,7 @@ def get_judged(project, judgement):
 
 def get_same_as(project):
     clusters = []
-    for (a, b) in get_judged(True):
+    for (a, b) in get_judged(project, True):
         for cluster in clusters:
             if a in cluster or b in cluster:
                 cluster.add(a)
@@ -28,11 +29,12 @@ def get_same_as(project):
 
 
 def canonicalise(project):
+    """Apply canonical UIDs based on same_as mappings."""
     same_as = get_same_as(project)
     for entity in project.entities:
         project.log.info("Canonicalising: %s", entity['name'])
         uid = entity.get('uid') or entity.get('uid_canonical')
-        canonical = max(same_as.get(uid, set([uid])))
+        canonical = merkle(same_as.get(uid, [uid]))
         project.entities.update({
             'uid': uid,
             'uid_canonical': canonical
@@ -51,7 +53,13 @@ def canonicalise(project):
         }, ['target'])
 
 
-def integrate(project):
+def merge(project):
+    canonicalise(project)
+    for row in project.entities.distinct('uid_canonical'):
+        merge_entity(project, row.get('uid_canonical'))
+
+
+def integrate(project, auto_match=False):
     judgements = {}
     for mapping in project.mappings:
         left, right = mapping.get('left_uid'), mapping.get('right_uid')
@@ -63,7 +71,7 @@ def integrate(project):
         for ouid in sames:
             decided.add(sorttuple(uid, ouid))
 
-    for (a, b) in get_judged(False):
+    for (a, b) in get_judged(project, False):
         for left in same_as.get(a, set([a])):
             for right in same_as.get(b, set([b])):
                 decided.add(sorttuple(left, right))
@@ -75,24 +83,31 @@ def integrate(project):
     scores = {}
     for left in data:
         project.log.info("Matching: %s", left['name'])
+        left_uid = left['uid']
+        if left_uid is None:
+            continue
+
         for right in data:
             right_uid = right['uid']
+            if right_uid is None:
+                continue
             if left['origin'] == right['origin']:
                 continue
-            if uid <= right_uid:
+            if left_uid <= right_uid:
                 continue
-            if sorttuple(uid, right_uid) in decided:
+            if sorttuple(left_uid, right_uid) in decided:
                 continue
             score = entity_similarity(left, right)
             if score < 0.7:
                 continue
-            key = (uid, right_uid)
+            key = (left_uid, right_uid)
             if key in scores:
                 score = max(scores[key], score)
             scores[key] = score
             mapping = {'score': score}
-            # if score > 0.9999999999999:
-            #     mapping['judgement'] = True
+            if auto_match and score > 0.9999999999999:
+                project.log.info("Automatch: %s", right['name'])
+                mapping['judgement'] = True
 
             for obj, prefix in ((left, 'left_'), (right, 'right_')):
                 for k, v in obj.items():

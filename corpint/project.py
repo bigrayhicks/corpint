@@ -6,7 +6,7 @@ from sqlalchemy import Boolean, Unicode, Float
 
 from corpint.origin import Origin
 from corpint.schema import TYPES
-from corpint.integrate import integrate, canonicalise
+from corpint.integrate import integrate, merge
 from corpint.util import ensure_column
 
 log = logging.getLogger(__name__)
@@ -45,15 +45,14 @@ class Project(object):
             raise ValueError("Invalid entity type: %r", data)
 
         try:
-            data['score'] = int(data.get('score', 0))
+            data['weight'] = int(data.get('weight', 0))
         except Exception:
-            raise ValueError("Invalid score: %r", data)
+            raise ValueError("Invalid weight: %r", data)
 
         if 'jurisdiction' in data:
             data['jurisdiction'] = countrynames.to_code(data['jurisdiction'])
 
         # TODO: partial dates
-
         aliases = data.pop('aliases', [])
         self.entities.upsert(data, ['origin', 'uid'])
         for alias in aliases:
@@ -72,9 +71,9 @@ class Project(object):
             return
         self.aliases.upsert(data, ['origin', 'uid', 'name'])
 
-    def integrate(self):
-        integrate(self)
-        canonicalise(self)
+    def integrate(self, auto_match=False):
+        integrate(self, auto_match=auto_match)
+        merge(self)
 
     def flush(self):
         self.entities.drop()
