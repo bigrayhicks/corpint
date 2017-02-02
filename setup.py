@@ -27,9 +27,14 @@ setup(
         'fingerprints',
         'unicodecsv',
         'python-Levenshtein',
+        'mwclient',
         'click'
     ],
     test_suite='nose.collector',
-    entry_points={},
+    entry_points={
+        'corpint.enrich': [
+            'wikipedia = corpint.enrich.wikipedia:enrich',
+        ]
+    },
     tests_require=['coverage', 'nose']
 )

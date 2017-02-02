@@ -22,7 +22,9 @@ with open(path.join(path.dirname(__file__), 'test.csv')) as fh:
     origin.clear()
     for entity in corpint.load.csv(fh):
         entity['uid'] = origin.uid(entity['name'])
+        entity['weight'] = 1
         origin.emit_entity(entity)
 
 log.info("Data integration...")
 project.integrate(auto_match=True)
+project.enrich('wikipedia')

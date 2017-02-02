@@ -6,7 +6,8 @@ from sqlalchemy import Boolean, Unicode, Float
 
 from corpint.origin import Origin
 from corpint.schema import TYPES
-from corpint.integrate import integrate, merge
+from corpint.integrate import integrate, iter_merge
+from corpint.enrich import get_enrichers
 from corpint.util import ensure_column
 
 log = logging.getLogger(__name__)
@@ -71,9 +72,29 @@ class Project(object):
             return
         self.aliases.upsert(data, ['origin', 'uid', 'name'])
 
+    def emit_judgement(self, uida, uidb, judgement):
+        if uida is None or uidb is None:
+            return
+        self.mappings.upsert({
+            'left_uid': max(uida, uidb),
+            'right_uid': min(uida, uidb),
+            'judgement': True
+        }, ['left_uid', 'right_uid'])
+
     def integrate(self, auto_match=False):
         integrate(self, auto_match=auto_match)
-        merge(self)
+
+    def iter_searches(self, min_weight=1):
+        for entity in iter_merge(self):
+            if entity['weight'] >= min_weight:
+                yield entity
+
+    def enrich(self, name):
+        enricher = get_enrichers().get(name)
+        if enricher is None:
+            raise RuntimeError("Enricher not found: %s" % name)
+        for entity in self.iter_searches():
+            enricher(self, entity)
 
     def flush(self):
         self.entities.drop()

@@ -65,6 +65,6 @@ def merge_entity(project, uid_canonical):
         if value is None:
             continue
         merged[key] = value
-    project.log.info("Merged: %(name)s", merged)
+    # project.log.info("Merged: %(name)s", merged)
     merged['aliases'] = aliases
-    pprint(merged)
+    return merged

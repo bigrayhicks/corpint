@@ -53,10 +53,10 @@ def canonicalise(project):
         }, ['target'])
 
 
-def merge(project):
+def iter_merge(project):
     canonicalise(project)
     for row in project.entities.distinct('uid_canonical'):
-        merge_entity(project, row.get('uid_canonical'))
+        yield merge_entity(project, row.get('uid_canonical'))
 
 
 def integrate(project, auto_match=False):
