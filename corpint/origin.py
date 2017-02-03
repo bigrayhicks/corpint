@@ -7,7 +7,7 @@ class Origin(object):
     def __init__(self, project, name):
         self.project = project
         self.name = unicode(name)
-        self.qname = '%s:%s' % (self.project.prefix, self.name)
+        self.qname = '%s.%s' % (self.project.prefix, self.name)
         self.log = logging.getLogger(self.qname)
 
     def uid(self, *args):
@@ -23,6 +23,10 @@ class Origin(object):
     def emit_alias(self, data):
         data['origin'] = self.name
         self.project.emit_alias(data)
+
+    def emit_link(self, data):
+        data['origin'] = self.name
+        self.project.emit_link(data)
 
     def emit_judgement(self, uida, uidb, judgement):
         self.project.emit_judgement(uida, uidb, judgement)

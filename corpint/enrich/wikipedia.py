@@ -81,19 +81,19 @@ def page_entity(origin, page, path=None):
         'uid': uid,
         'wikipedia_' + page.pagelanguage: page.name,
         'name': page.page_title,
+        'aliases': aliases
     })
     return uid
 
 
-def enrich(project, entity):
+def enrich(origin, entity):
     # Assume entries on companies in Wikipedia are pretty useless.
     if entity['type'] in [COMPANY, ORGANIZATION]:
         return
 
-    origin = project.origin('wikipedia')
     for lang, site in SITES.items():
         name = entity['name']
-        project.log.info("Search [%s]: %s", lang, name)
+        origin.log.info("Search [%s]: %s", lang, name)
         for res in site.search(name, what='nearmatch', limit=5):
             page = site.Pages[res.get('title')]
             page_entity(origin, page)

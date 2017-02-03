@@ -1,4 +1,4 @@
-type,name,jurisdiction,dob
+type,name,country,dob
 Person,Damian Calderbank,GB,
 Company,Open Knowledge Foundation,GB,
 Person,William Gates III,US,

@@ -26,14 +26,21 @@ setup(
         'countrynames',
         'fingerprints',
         'unicodecsv',
+        'lxml',
         'python-Levenshtein',
-        'mwclient',
+        'mwclient',  # wikipedia
+        'rdflib',  # wikidata
+        'SPARQLWrapper',  # wikidata
+        'zeep',  # bvd orbis (soap)
         'click'
     ],
     test_suite='nose.collector',
     entry_points={
         'corpint.enrich': [
             'wikipedia = corpint.enrich.wikipedia:enrich',
+            'wikidata = corpint.enrich.wikidata:enrich',
+            'opencorporates = corpint.enrich.opencorporates:enrich',
+            'aleph = corpint.enrich.aleph:enrich',
         ]
     },
     tests_require=['coverage', 'nose']

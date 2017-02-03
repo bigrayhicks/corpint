@@ -26,5 +26,8 @@ with open(path.join(path.dirname(__file__), 'test.csv')) as fh:
         origin.emit_entity(entity)
 
 log.info("Data integration...")
-project.integrate(auto_match=True)
-project.enrich('wikipedia')
+# project.integrate(auto_match=True)
+# project.enrich('wikipedia')
+# project.integrate(auto_match=True)
+# project.enrich('wikidata')
+project.enrich('aleph')

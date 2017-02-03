@@ -15,13 +15,13 @@ log = logging.getLogger(__name__)
 
 class Project(object):
 
-    def __init__(self, prefix):
+    def __init__(self, prefix, database_uri=None):
         self.prefix = unicode(prefix)
         self.log = logging.getLogger(self.prefix)
 
-        database_uri = environ.get('DATABASE_URI')
         if database_uri is None:
-            database_uri = 'sqlite:///%s.sqlite3' % self.prefix
+            local = 'sqlite:///%s.sqlite3' % self.prefix
+            database_uri = environ.get('DATABASE_URI', local)
         self.db = dataset.connect(database_uri)
         self.entities = self.db['%s_entities' % self.prefix]
         self.aliases = self.db['%s_aliases' % self.prefix]
@@ -50,8 +50,8 @@ class Project(object):
         except Exception:
             raise ValueError("Invalid weight: %r", data)
 
-        if 'jurisdiction' in data:
-            data['jurisdiction'] = countrynames.to_code(data['jurisdiction'])
+        if 'country' in data:
+            data['country'] = countrynames.to_code(data['country'])
 
         # TODO: partial dates
         aliases = data.pop('aliases', [])
@@ -71,6 +71,9 @@ class Project(object):
             # TODO: should this raise?
             return
         self.aliases.upsert(data, ['origin', 'uid', 'name'])
+
+    def emit_link(self, data):
+        self.links.upsert(data, ['origin', 'source', 'target'])
 
     def emit_judgement(self, uida, uidb, judgement):
         if uida is None or uidb is None:
@@ -93,8 +96,9 @@ class Project(object):
         enricher = get_enrichers().get(name)
         if enricher is None:
             raise RuntimeError("Enricher not found: %s" % name)
+        origin = self.origin(name)
         for entity in self.iter_searches():
-            enricher(self, entity)
+            enricher(origin, entity)
 
     def flush(self):
         self.entities.drop()
