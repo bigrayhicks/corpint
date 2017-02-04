@@ -11,4 +11,5 @@ def project(prefix, database_uri=None):
     logging.basicConfig(level=logging.INFO)
     logging.getLogger('requests').setLevel(logging.WARNING)
     logging.getLogger('alembic').setLevel(logging.WARNING)
+    logging.getLogger('zeep').setLevel(logging.WARNING)
     return Project(prefix, database_uri=database_uri)

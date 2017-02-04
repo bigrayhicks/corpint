@@ -5,4 +5,4 @@ build/*
 dist/*
 .DS_Store
 *.sqlite3
-
+.env

@@ -12,3 +12,10 @@ investigations.
 * Enrich data from OpenCorporates, Orbis, Wikipedia, Wikidata, Aleph
 * Mark duplicates
 * Generate a unified view of the resulting watchlist
+
+
+## TODO (near term)
+
+* "tasked" flag
+* Merging UI
+* Neo4J Exporter

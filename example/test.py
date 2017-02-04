@@ -16,18 +16,18 @@ origin.emit_entity({
     'jurisdiction': 'United Kingdom'
 })
 
-log.info("Reading CSV file...")
-with open(path.join(path.dirname(__file__), 'test.csv')) as fh:
-    origin = project.origin(fh.name)
-    origin.clear()
-    for entity in corpint.load.csv(fh):
-        entity['uid'] = origin.uid(entity['name'])
-        entity['weight'] = 1
-        origin.emit_entity(entity)
+# log.info("Reading CSV file...")
+# with open(path.join(path.dirname(__file__), 'test.csv')) as fh:
+#     origin = project.origin(fh.name)
+#     origin.clear()
+#     for entity in corpint.load.csv(fh):
+#         entity['uid'] = origin.uid(entity['name'])
+#         entity['weight'] = 1
+#         origin.emit_entity(entity)
 
 log.info("Data integration...")
 # project.integrate(auto_match=True)
 # project.enrich('wikipedia')
 # project.integrate(auto_match=True)
 # project.enrich('wikidata')
-project.enrich('aleph')
+project.enrich('bvdorbis')

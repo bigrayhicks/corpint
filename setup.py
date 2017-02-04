@@ -41,6 +41,7 @@ setup(
             'wikidata = corpint.enrich.wikidata:enrich',
             'opencorporates = corpint.enrich.opencorporates:enrich',
             'aleph = corpint.enrich.aleph:enrich',
+            'bvdorbis = corpint.enrich.bvdorbis:enrich',
         ]
     },
     tests_require=['coverage', 'nose']

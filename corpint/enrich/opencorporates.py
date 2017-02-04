@@ -37,7 +37,8 @@ def emit_officer(origin, officer, company_url=None):
     company = officer.get('company')
     if company_url is None and company is not None:
         company_url = company.get('opencorporates_url')
-        emit_company(origin, company)
+        # always download full company records.
+        get_company(origin, company_url)
 
     origin.log.info("OC Officer [%(id)s]: %(name)s", officer)
     officer_uid = origin.uid(officer['opencorporates_url'])
@@ -98,6 +99,9 @@ def emit_company(origin, company):
 
 
 def get_company(origin, opencorporates_url):
+    company_uid = origin.uid(opencorporates_url)
+    if origin.entity_exists(company_uid):
+        return company_uid
     company = get_oc_api(opencorporates_url)
     return emit_company(origin, company)
 

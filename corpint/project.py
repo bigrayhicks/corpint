@@ -53,6 +53,17 @@ class Project(object):
         if 'country' in data:
             data['country'] = countrynames.to_code(data['country'])
 
+        name = data.get('name')
+        if name is not None:
+            name = unicode(name).strip()
+            if not len(name):
+                name = None
+            data['name'] = name
+
+        for k, v in data.items():
+            if v is None:
+                data.pop(k)
+
         # TODO: partial dates
         aliases = data.pop('aliases', [])
         self.entities.upsert(data, ['origin', 'uid'])
@@ -66,10 +77,11 @@ class Project(object):
         return data
 
     def emit_alias(self, data):
-        name = data.get('name')
-        if not len(name.strip()):
-            # TODO: should this raise?
+        name = data.get('name') or ''
+        name = name.strip()
+        if not len(name):
             return
+        data['name'] = name
         self.aliases.upsert(data, ['origin', 'uid', 'name'])
 
     def emit_link(self, data):
