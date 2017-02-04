@@ -32,6 +32,7 @@ setup(
         'rdflib',  # wikidata
         'SPARQLWrapper',  # wikidata
         'zeep',  # bvd orbis (soap)
+        'py2neo',
         'click'
     ],
     test_suite='nose.collector',

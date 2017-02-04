@@ -1,5 +1,6 @@
 import logging
 from os import path
+from pprint import pprint  # noqa
 import corpint
 
 log = logging.getLogger('test')
@@ -30,4 +31,7 @@ log.info("Data integration...")
 # project.enrich('wikipedia')
 # project.integrate(auto_match=True)
 # project.enrich('wikidata')
-project.enrich('bvdorbis')
+# project.enrich('bvdorbis')
+
+from corpint.export import load_to_neo4j
+load_to_neo4j(project, 'http://neo4j:test@localhost:7474')

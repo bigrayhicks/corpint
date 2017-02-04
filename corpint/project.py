@@ -6,7 +6,7 @@ from sqlalchemy import Boolean, Unicode, Float
 
 from corpint.origin import Origin
 from corpint.schema import TYPES
-from corpint.integrate import integrate, iter_merge
+from corpint.integrate import integrate, merge_entities, merge_links
 from corpint.enrich import get_enrichers
 from corpint.util import ensure_column
 
@@ -99,10 +99,18 @@ class Project(object):
     def integrate(self, auto_match=False):
         integrate(self, auto_match=auto_match)
 
+    def iter_merged_entities(self):
+        for entity in merge_entities(self):
+            yield entity
+
     def iter_searches(self, min_weight=1):
-        for entity in iter_merge(self):
+        for entity in self.iter_merged_entities():
             if entity['weight'] >= min_weight:
                 yield entity
+
+    def iter_merged_links(self):
+        for link in merge_links(self):
+            yield link
 
     def enrich(self, name):
         enricher = get_enrichers().get(name)

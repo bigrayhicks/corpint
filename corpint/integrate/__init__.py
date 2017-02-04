@@ -1,6 +1,6 @@
 from corpint.integrate.similarity import entity_similarity
 from corpint.integrate.util import sorttuple, merkle
-from corpint.integrate.merge import merge_entity
+from corpint.integrate.merge import merge_entity, merge_links  # noqa
 
 # TODO: this code is a hacky mess. perhaps replace it with datamade's dedupe?
 
@@ -31,8 +31,8 @@ def get_same_as(project):
 def canonicalise(project):
     """Apply canonical UIDs based on same_as mappings."""
     same_as = get_same_as(project)
+    project.log.info("Canonicalising (%s mappings)...", len(same_as))
     for entity in project.entities:
-        project.log.info("Canonicalising: %s", entity['name'])
         uid = entity.get('uid') or entity.get('uid_canonical')
         canonical = merkle(same_as.get(uid, [uid]))
         project.entities.update({
@@ -53,7 +53,7 @@ def canonicalise(project):
         }, ['target'])
 
 
-def iter_merge(project):
+def merge_entities(project):
     canonicalise(project)
     for row in project.entities.distinct('uid_canonical'):
         yield merge_entity(project, row.get('uid_canonical'))

@@ -116,11 +116,13 @@ def get_officer(origin, opencorporates_url):
 
 def get_grouping(origin, name):
     url = GROUPING_API % quote_plus(name)
+    origin.log.info("Loading grouping from: %s", url)
     results = get_oc_api(url)
     grouping = results.get('corporate_grouping')
     memberships = grouping.pop('memberships', [])
-    for company in memberships:
-        company = company.get('company')
+    for membership in memberships:
+        membership = membership.get('membership')
+        company = membership.get('company')
         get_company(origin, company.get('opencorporates_url'))
 
 

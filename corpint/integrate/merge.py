@@ -2,6 +2,7 @@ from pprint import pprint  # noqa
 from collections import defaultdict
 from Levenshtein import distance
 
+from corpint.integrate.util import sorttuple
 from corpint.schema import choose_best_type
 
 
@@ -24,7 +25,7 @@ def choose_best_name(values):
 
 
 def merge_values(values):
-    return '; '.join(set(values))
+    return '; '.join(set([unicode(v) for v in values]))
 
 
 def merge_entity(project, uid_canonical):
@@ -48,7 +49,10 @@ def merge_entity(project, uid_canonical):
                 continue
             entity[key].append(value)
 
-    merged = {'uid': uid_canonical}
+    merged = {
+        'uid': uid_canonical,
+        'origin': set()
+    }
     for key, values in entity.items():
         if key in ['uid', 'origin']:
             continue
@@ -60,6 +64,9 @@ def merge_entity(project, uid_canonical):
             value = choose_best_name(values)
             aliases.update(values)
             aliases.remove(value)
+        elif key == 'origin':
+            merged[key].update(values)
+            continue
         else:
             value = merge_values(values)
         if value is None:
@@ -68,3 +75,42 @@ def merge_entity(project, uid_canonical):
     # project.log.info("Merged: %(name)s", merged)
     merged['aliases'] = aliases
     return merged
+
+
+def merge_links(project):
+    links = defaultdict(list)
+    for link in project.links:
+        link.pop('source')
+        link.pop('target')
+        nodes = sorttuple(link.pop('source_canonical'),
+                          link.pop('target_canonical'))
+        if None in nodes:
+            continue
+        links[nodes].append(dict(link))
+
+    for (source, target), items in links.items():
+        merged = {
+            'source': source,
+            'target': target,
+            'origin': set()
+        }
+        link = defaultdict(list)
+        for item in items:
+            item.pop('id')
+            for key, value in item.items():
+                if value is None or not len(unicode(value).strip()):
+                    continue
+                link[key].append(value)
+
+        for key, values in link.items():
+            if key == 'origin':
+                merged[key].update(values)
+                continue
+            else:
+                value = merge_values(values)
+            if value is None:
+                continue
+            merged[key] = value
+
+        # pprint(merged)
+        yield merged

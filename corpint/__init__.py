@@ -12,4 +12,6 @@ def project(prefix, database_uri=None):
     logging.getLogger('requests').setLevel(logging.WARNING)
     logging.getLogger('alembic').setLevel(logging.WARNING)
     logging.getLogger('zeep').setLevel(logging.WARNING)
+    logging.getLogger('httpstream').setLevel(logging.WARNING)
+    logging.getLogger('neo4j').setLevel(logging.WARNING)
     return Project(prefix, database_uri=database_uri)
