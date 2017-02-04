@@ -20,7 +20,7 @@ def load_to_neo4j(project, neo4j_url):
         graph.run('MATCH (n) DETACH DELETE n')
         entities = {}
         for entity in project.iter_merged_entities():
-            label = entity.pop('type') or 'Other'
+            label = entity.pop('type', None) or 'Other'
             node = Node(label, **normalise(entity))
             tx.create(node)
             entities[entity['uid']] = node
