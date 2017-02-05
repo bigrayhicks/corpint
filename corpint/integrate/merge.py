@@ -50,11 +50,12 @@ def merge_entity(project, uid_canonical):
             entity[key].append(value)
 
     merged = {
-        'uid': uid_canonical,
+        'uid': set(),
         'origin': set()
     }
     for key, values in entity.items():
         if key in ['uid', 'origin']:
+            merged[key].update(values)
             continue
         if key == 'type':
             value = choose_best_type(values)
@@ -64,16 +65,18 @@ def merge_entity(project, uid_canonical):
             value = choose_best_name(values)
             aliases.update(values)
             aliases.remove(value)
-        elif key == 'origin':
-            merged[key].update(values)
-            continue
         else:
             value = merge_values(values)
         if value is None:
             continue
         merged[key] = value
     # project.log.info("Merged: %(name)s", merged)
+    merged['uid_parts'] = merged['uid']
+    merged['uid'] = uid_canonical
+    merged['type'] = merged.get('type')
     merged['aliases'] = aliases
+    merged['names'] = set(aliases)
+    merged['names'].add(merged['name'])
     return merged
 
 

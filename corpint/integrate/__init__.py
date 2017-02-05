@@ -36,7 +36,7 @@ def merge_entities(project):
         yield merge_entity(project, row.get('uid_canonical'))
 
 
-def integrate(project, auto_match=False):
+def integrate(project):
     decided = get_decided(project)
     project.log.info("%s decisions already made...", len(decided))
 
@@ -67,9 +67,6 @@ def integrate(project, auto_match=False):
                 score = max(scores[key], score)
             scores[key] = score
             mapping = {'score': score}
-            if auto_match and score > 0.9999999999999:
-                project.log.info("Automatch: %s", right['name'])
-                mapping['judgement'] = True
 
             for obj, prefix in ((left, 'left_'), (right, 'right_')):
                 for k, v in obj.items():

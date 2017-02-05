@@ -54,13 +54,14 @@ def aleph_api(url, params=None):
 def aleph_paged(url, params=None):
     params = params or dict()
     params['limit'] = 50
+    params['offset'] = 0
     while True:
         data = aleph_api(url, params=params)
         # pprint(data)
         for result in data.get('results', []):
             yield result
-        next_offset = data['offset'] + params['limit']
-        if next_offset > data['total']:
+        next_offset = params['offset'] + params['limit']
+        if next_offset > data.get('total', 0):
             break
         params['offset'] = next_offset
 
@@ -83,6 +84,8 @@ def emit_entity(origin, entity, links=True):
         return
 
     entity_uid = origin.uid(entity.get('id'))
+    if entity_uid is None:
+        return
     data = {
         'aleph_id': '%s:%s' % (entity.get('dataset'), entity.get('id')),
         'uid': entity_uid,
@@ -92,12 +95,14 @@ def emit_entity(origin, entity, links=True):
         data['type'] = entity.get('Schema')
 
     data.update(map_properties(entity, ENTITY_PROPERTIES))
-    origin.log.info("Aleph [%(dataset)s]: %(name)s", entity)
+    origin.log.info("[%(dataset)s]: %(name)s", entity)
     origin.emit_entity(data)
 
     if links:
         for link in aleph_paged(entity.get('api_url') + '/links'):
             other_uid = emit_entity(origin, link.get('remote'), links=False)
+            if other_uid is None:
+                continue
             ldata = {
                 'source': other_uid if link['inverted'] else entity_uid,
                 'target': entity_uid if link['inverted'] else other_uid,

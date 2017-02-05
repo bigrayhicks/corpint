@@ -2,6 +2,7 @@ import logging
 from os import environ
 import dataset
 import countrynames
+from pprint import pprint  # noqa
 from sqlalchemy import Boolean, Unicode, Float
 
 from corpint.origin import Origin
@@ -112,13 +113,16 @@ class Project(object):
         for link in merge_links(self):
             yield link
 
-    def enrich(self, name):
+    def enrich(self, name, origin=None):
         enricher = get_enrichers().get(name)
         if enricher is None:
             raise RuntimeError("Enricher not found: %s" % name)
-        origin = self.origin(name)
+        sink = self.origin(name)
         for entity in self.iter_searches():
-            enricher(origin, entity)
+            if origin is not None and origin not in entity.get('origin'):
+                continue
+            # pprint(entity)
+            enricher(sink, entity)
 
     def flush(self):
         self.entities.drop()

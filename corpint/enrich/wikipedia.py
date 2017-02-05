@@ -92,8 +92,8 @@ def enrich(origin, entity):
         return
 
     for lang, site in SITES.items():
-        name = entity['name']
-        origin.log.info("Search [%s]: %s", lang, name)
-        for res in site.search(name, what='nearmatch', limit=5):
-            page = site.Pages[res.get('title')]
-            page_entity(origin, page)
+        origin.log.info("Search [%s]: %s", lang, entity['name'])
+        for name in entity.get('names', []):
+            for res in site.search(name, what='nearmatch', limit=5):
+                page = site.Pages[res.get('title')]
+                page_entity(origin, page)
