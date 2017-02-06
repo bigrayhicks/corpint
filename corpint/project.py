@@ -87,6 +87,10 @@ class Project(object):
         self.aliases.upsert(data, ['origin', 'uid', 'name'])
 
     def emit_link(self, data):
+        if data['source'] is None or data['target'] is None:
+            return
+        if data['source'] == data['target']:
+            return
         self.links.upsert(data, ['origin', 'source', 'target'])
 
     def emit_judgement(self, uida, uidb, judgement):

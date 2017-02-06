@@ -1,3 +1,4 @@
+import fingerprints
 from py2neo import Graph, Node, Relationship
 
 
@@ -12,12 +13,22 @@ def normalise(data):
     return properties
 
 
+def clear_leaf_nodes(tx, label):
+    tx.run("""MATCH ()-[r]->(n:%s)
+        WITH n, collect(r) as rr
+        WHERE length(rr) <= 1 AND NOT n-->()
+        FOREACH (r IN rr | DELETE r)
+        DELETE n
+    """ % label)
+
+
 def load_to_neo4j(project, neo4j_url):
     graph = Graph(neo4j_url)
 
     tx = graph.begin()
+    project.log.info("Loading graph to Neo4J...")
     try:
-        graph.run('MATCH (n) DETACH DELETE n')
+        tx.run('MATCH (n) DETACH DELETE n')
         entities = {}
         for entity in project.iter_merged_entities():
             label = entity.pop('type', None) or 'Other'
@@ -25,12 +36,38 @@ def load_to_neo4j(project, neo4j_url):
             tx.create(node)
             entities[entity['uid']] = node
 
+            # create "Name" fake nodes
+            fps = set()
+            for name in entity.get('names', []):
+                fp = fingerprints.generate(name)
+                if fp is None:
+                    continue
+                fp = fp.replace(' ', '-')
+                if fp in fps:
+                    continue
+                fps.add(fp)
+                alias = Node('Name', name=name, fp=fp)
+                tx.merge(alias, 'Name', 'fp')
+                rel = Relationship(node, 'ALIAS', alias)
+                tx.create(rel)
+
+            address = entity.get('address')
+            fp = fingerprints.generate(address)
+            if fp is not None:
+                fp = fp.replace(' ', '-')
+                loc = Node('Address', name=address, fp=fp)
+                tx.merge(loc, 'Address', 'fp')
+                rel = Relationship(node, 'LOCATION', alias)
+                tx.create(rel)
+
         for link in project.iter_merged_links():
             source = entities.get(link.pop('source'))
             target = entities.get(link.pop('target'))
             rel = Relationship(source, 'LINK', target, **normalise(link))
             tx.create(rel)
 
+        clear_leaf_nodes(tx, 'Name')
+        clear_leaf_nodes(tx, 'Address')
         tx.commit()
     except Exception as ex:
         project.log.exception(ex)
