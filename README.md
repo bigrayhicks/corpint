@@ -3,6 +3,15 @@
 Corporate open-source intelligence toolkit for data-driven
 investigations.
 
+## Install
+
+    python setup.py install
+
+
+## Develop
+
+    python setup.py develop
+    
 
 ## Scope
 
