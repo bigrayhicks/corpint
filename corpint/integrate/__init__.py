@@ -36,7 +36,7 @@ def merge_entities(project):
         yield merge_entity(project, row.get('uid_canonical'))
 
 
-def integrate(project):
+def integrate(project, auto_match=False):
     decided = get_decided(project)
     project.log.info("%s decisions already made...", len(decided))
 
