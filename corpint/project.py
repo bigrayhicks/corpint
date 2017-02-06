@@ -31,6 +31,7 @@ class Project(object):
 
         ensure_column(self.mappings, 'judgement', Boolean)
         ensure_column(self.mappings, 'score', Float)
+        ensure_column(self.mappings, 'judgement_attribution', Unicode)
         for field in ['name', 'jurisdiction', 'date', 'type', 'origin', 'uid']:
             ensure_column(self.mappings, 'left_' + field, Unicode)
             ensure_column(self.mappings, 'right_' + field, Unicode)

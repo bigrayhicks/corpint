@@ -66,7 +66,7 @@ def integrate(project, auto_match=False):
             if key in scores:
                 score = max(scores[key], score)
             scores[key] = score
-            mapping = {'score': score}
+            mapping = {'score': score, 'judgement_attribution': 'automatic'}
 
             for obj, prefix in ((left, 'left_'), (right, 'right_')):
                 for k, v in obj.items():
