@@ -1,0 +1,80 @@
+{% extends "master.html" %}
+
+{% block title %}Home - Corporate Intelligence{% endblock %}
+
+{% block body %}
+
+<h1>Corporate Intelligence</h1>
+
+<p>Lorem ipsum dolor sit</p>
+
+<h3>Automatic matches to approve</h3>
+
+<p>Please approve the following automatic matches.</p>
+
+<table id="to_approve" class="table table-hover table-bordered">
+<thead>
+<tr>
+<th>Name 1</th>
+<th>Name 2</th>
+<th>Are these two names a match?</th>
+</tr>
+</thead>
+{% if automatic_mappings|length %}
+{% for mapping in automatic_mappings %}
+<tr>
+<td><h4>{{ mapping.left_name }}</h4>
+Source: {{mapping.left_origin}}</td>
+<td><h4>{{ mapping.right_name }}</h4>
+Source: {{ mapping.right_origin }}
+</td>
+<td>
+<form data-leftuid="{{mapping.left_uid}}" data-rightuid="{{mapping.right_uid}}">
+<button type="button" data-action="approve" class="btn btn-success">
+<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Approve</button>
+<button type="button" data-action="reject" class="btn btn-danger">
+<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Reject</button>
+</form>
+</td>
+</tr>
+{% endfor %}
+{% else %}
+<tr><td colspan=3>No matches to approve</td></tr>
+{% endif %}
+</table>
+
+<h3>Your approved matches</h3>
+<p>You've already approved the following name matches. If you got something wrong, just click "Undo decision".</p>
+
+<table id="to_review" class="table table-hover table-bordered">
+<thead>
+<tr>
+<th>Name 1</th>
+<th>Name 2</th>
+<th>Matched?</th>
+</tr>
+</thead>
+{% if manual_mappings|length %}
+{% for mapping in manual_mappings %}
+<tr class="{{ 'approved' if mapping.judgement else 'rejected' }}">
+<td>
+<h4>{{ mapping.left_name }}</h4>
+Source: {{mapping.left_origin}}
+</td>
+<td>
+<h4>{{ mapping.right_name }}</h4>
+Source: {{ mapping.right_origin }}
+</td>
+<td>
+<span data-leftuid="{{mapping.left_uid}}" data-rightuid="{{mapping.right_uid}}">
+{{ 'Approved' if mapping.judgement else 'Rejected' }}<br/><a data-action="review" href='#' class="review">Undo decision</a>
+</span>
+</td>
+</tr>
+{% endfor %}
+{% else %}
+<tr><td colspan=3>No manual matches</td></tr>
+{% endif %}
+</table>
+
+{% endblock %}

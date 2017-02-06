@@ -13,6 +13,13 @@ investigations.
     python setup.py develop
     
 
+## Run the merging UI
+
+There's a very alpha Flask merging UI to allow you to merge or reject entity mappings. To run it:
+
+    python userfacing.py
+
+
 ## Scope
 
 * Basic corporate data model as SQL tables
@@ -28,3 +35,5 @@ investigations.
 * "tasked" flag
 * Merging UI
 * Neo4J Exporter
+* Use dedupe library, with merging UI as input for decisions
+

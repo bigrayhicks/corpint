@@ -33,7 +33,8 @@ setup(
         'SPARQLWrapper',  # wikidata
         'zeep',  # bvd orbis (soap)
         'py2neo',
-        'click'
+        'click',
+        'Flask'
     ],
     test_suite='nose.collector',
     entry_points={

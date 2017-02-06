@@ -1,0 +1,12 @@
+tr.approved {
+	background-color: rgba(92,184,92,0.3);
+}
+tr.rejected {
+	background-color: rgba(201,48,44,0.3);
+}
+#to_approve .btn {
+	margin-top: 10px;
+}
+#to_approve .btn .glyphicon {
+	margin-right: 5px;
+}
