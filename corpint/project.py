@@ -1,5 +1,4 @@
 import logging
-from os import environ
 import dataset
 import countrynames
 from pprint import pprint  # noqa

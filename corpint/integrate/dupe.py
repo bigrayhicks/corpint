@@ -51,20 +51,44 @@ def get_trainset(project, judgement, data):
     return trainset
 
 
-def get_deduper(project):
+def create_deduper(project):
     deduper = dedupe.Dedupe(VARIABLES)
     data = {e['uid']: to_record(e) for e in project.entities}
-    deduper.sample(data)
-    deduper.markPairs({
-        'match': get_trainset(project, True, data),
-        'distinct': get_trainset(project, False, data)
-    })
+    if len(data):
+        deduper.sample(data)
+        deduper.markPairs({
+            'match': get_trainset(project, True, data),
+            'distinct': get_trainset(project, False, data)
+        })
     return deduper, data
 
 
+def train_judgement(project, deduper, uida, uidb, judgement):
+    if judgement is None:
+        return
+    enta = project.entities.find_one(uid=uida)
+    entb = project.entities.find_one(uid=uidb)
+    pair = (to_record(enta), to_record(entb))
+    match, distinct = [], []
+    if judgement:
+        match.append(pair)
+    else:
+        distinct.append(pair)
+    deduper.markPairs({'match': match, 'distinct': distinct})
+
+
+def train_dedupe(deduper):
+    try:
+        deduper.train()
+        return True
+    except ValueError as ve:
+        return False
+
+
 def canonicalise(project):
-    deduper, data = get_deduper(project)
-    deduper.train()
+    deduper, data = create_deduper(project)
+    if not train_dedupe(deduper):
+        return
     threshold = deduper.threshold(data, recall_weight=1)
 
     updates = (
@@ -89,7 +113,7 @@ def canonicalise(project):
 
 
 def run_dedupe(project):
-    deduper, data = get_deduper(project)
+    deduper, data = create_deduper(project)
     deduper.train()
     dedupe.consoleLabel(deduper)
     deduper.train()

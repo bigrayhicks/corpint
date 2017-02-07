@@ -41,6 +41,9 @@ setup(
     ],
     test_suite='nose.collector',
     entry_points={
+        'console_scripts': [
+            'corpint = corpint.cli:main',
+        ],
         'corpint.enrich': [
             'wikipedia = corpint.enrich.wikipedia:enrich',
             'wikidata = corpint.enrich.wikidata:enrich',

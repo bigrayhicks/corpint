@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+
+{% block title %}Undecided{% endblock %}
+
+{% block body %}
+
+<h3>Automatic matches to approve</h3>
+
+<p>Please approve the following automatic matches.</p>
+
+<table class="table table-bordered table-hover">
+  <thead>
+    <tr>
+      <th></th>
+      <th width="40%">Item 1</th>
+      <th width="40%">Item 2</th>
+      <th colspan="3">Are these the same?</th>
+    </tr>
+  </thead>
+  {% if candidates|length %}
+    {% for candidate in candidates %}
+      <tbody>
+        <tr>
+          <td></td>
+          <td>
+            <strong>{{ candidate.left.name }}</strong>
+          <td>
+            <strong>{{ candidate.right.name }}</strong>
+          </td>
+          <td width="1%" rowspan="{{candidate.height}}">
+            <form method="POST">
+              <input type="hidden" name="left" value="{{candidate.left.uid}}" />
+              <input type="hidden" name="right" value="{{candidate.right.uid}}" />
+              <input type="hidden" name="judgement" value="TRUE" />
+              <button type="submit" class="btn btn-success">
+                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                Yes
+              </button>
+            </form>
+          </td>
+          <td width="1%" rowspan="{{candidate.height}}">
+            <form method="POST">
+              <input type="hidden" name="left" value="{{candidate.left.uid}}" />
+              <input type="hidden" name="right" value="{{candidate.right.uid}}" />
+              <input type="hidden" name="judgement" value="FALSE" />
+              <button type="submit" data-action="reject" class="btn btn-danger">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                No
+              </button>
+            </form>
+          </td>
+          <td width="1%" rowspan="{{candidate.height}}">
+            <form method="POST">
+              <input type="hidden" name="left" value="{{candidate.left.uid}}" />
+              <input type="hidden" name="right" value="{{candidate.right.uid}}" />
+              <input type="hidden" name="judgement" value="NULL" />
+              <button type="submit" data-action="reject" class="btn btn-default">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                Unsure
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% for field in candidate.fields %}
+          <tr>
+            <td>{{field | capitalize}}</td>
+            <td>{{candidate.left[field] or ''}}</td>
+            <td>{{candidate.right[field] or ''}}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td>Source</td>
+          <td><code>{{candidate.left.origin}}</code></td>
+          <td><code>{{candidate.right.origin}}</code></td>
+        </tr>
+      </tbody>
+    {% endfor %}
+  {% else %}
+    <tr>
+      <td colspan=3>No matches to approve</td>
+    </tr>
+  {% endif %}
+</table>
+
+{% endblock %}

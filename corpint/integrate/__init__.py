@@ -1,6 +1,7 @@
 from corpint.integrate.similarity import entity_similarity
 from corpint.integrate.util import sorttuple, merkle, get_same_as, get_decided
 from corpint.integrate.merge import merge_entity, merge_links  # noqa
+from corpint.integrate.dupe import create_deduper, train_dedupe, train_judgement
 
 # TODO: this code is a hacky mess. perhaps replace it with datamade's dedupe?
 
