@@ -221,10 +221,11 @@ def enrich(origin, entity):
         # print client.service.GetAvailableModels(session)
 
         MatchCriteria = client.get_type('ns0:MatchCriteria')
-        ct = MatchCriteria(Name=entity.get('name'),
-                           Country=entity.get('country'))
+        ct = MatchCriteria(Name=entity.get('name'))
+        #                   Country=entity.get('country'))
         res = client.service.Match(session, ct, ['None'])
-        for data in res:
-            emit_company(origin, client, session, data)
+        if res is not None:
+            for data in res:
+                emit_company(origin, client, session, data)
     finally:
         client.service.Close(session)

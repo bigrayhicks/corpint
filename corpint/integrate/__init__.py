@@ -5,29 +5,31 @@ from corpint.integrate.merge import merge_entity, merge_links  # noqa
 # TODO: this code is a hacky mess. perhaps replace it with datamade's dedupe?
 
 
-def canonicalise(project):
-    """Apply canonical UIDs based on same_as mappings."""
-    same_as = get_same_as(project)
-    project.log.info("Canonicalising (%s mappings)...", len(same_as))
-    for entity in project.entities:
-        uid = entity.get('uid') or entity.get('uid_canonical')
-        canonical = merkle(same_as.get(uid, [uid]))
-        project.entities.update({
-            'uid': uid,
-            'uid_canonical': canonical
-        }, ['uid'])
-        project.aliases.update({
-            'uid': uid,
-            'uid_canonical': canonical
-        }, ['uid'])
-        project.links.update({
-            'source': uid,
-            'source_canonical': canonical
-        }, ['source'])
-        project.links.update({
-            'target': uid,
-            'target_canonical': canonical
-        }, ['target'])
+# def canonicalise(project):
+#     """Apply canonical UIDs based on same_as mappings."""
+#     same_as = get_same_as(project)
+#     project.log.info("Canonicalising (%s mappings)...", len(same_as))
+#     for entity in project.entities:
+#         uid = entity.get('uid') or entity.get('uid_canonical')
+#         canonical = merkle(same_as.get(uid, [uid]))
+#         project.entities.update({
+#             'uid': uid,
+#             'uid_canonical': canonical
+#         }, ['uid'])
+#         project.aliases.update({
+#             'uid': uid,
+#             'uid_canonical': canonical
+#         }, ['uid'])
+#         project.links.update({
+#             'source': uid,
+#             'source_canonical': canonical
+#         }, ['source'])
+#         project.links.update({
+#             'target': uid,
+#             'target_canonical': canonical
+#         }, ['target'])
+
+from corpint.integrate.dupe import canonicalise
 
 
 def merge_entities(project):

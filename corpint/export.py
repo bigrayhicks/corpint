@@ -1,6 +1,8 @@
 import fingerprints
 from py2neo import Graph, Node, Relationship
 
+from corpint import env
+
 
 def normalise(data):
     properties = {}
@@ -22,11 +24,14 @@ def clear_leaf_nodes(tx, label):
     """ % label)
 
 
-def load_to_neo4j(project, neo4j_url):
-    graph = Graph(neo4j_url)
-
+def load_to_neo4j(project, neo4j_uri=None):
+    neo4j_uri = neo4j_uri or env.NEO4J_URI
+    if neo4j_uri is None:
+        project.log.error("No $NEO4J_URI set, cannot load graph.")
+        return
+    project.log.info("Loading graph to Neo4J: %s", neo4j_uri)
+    graph = Graph(neo4j_uri)
     tx = graph.begin()
-    project.log.info("Loading graph to Neo4J...")
     try:
         tx.run('MATCH (n) DETACH DELETE n')
         entities = {}
@@ -63,6 +68,8 @@ def load_to_neo4j(project, neo4j_url):
         for link in project.iter_merged_links():
             source = entities.get(link.pop('source'))
             target = entities.get(link.pop('target'))
+            if source is None or target is None:
+                continue
             rel = Relationship(source, 'LINK', target, **normalise(link))
             tx.create(rel)
 

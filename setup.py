@@ -26,6 +26,9 @@ setup(
         'countrynames',
         'fingerprints',
         'unicodecsv',
+        'numpy>=1.9',
+        'dedupe',
+        'dedupe-variable-address',
         'lxml',
         'python-Levenshtein',
         'mwclient',  # wikipedia

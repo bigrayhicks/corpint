@@ -4,7 +4,8 @@ from pprint import pprint  # noqa
 import corpint
 
 log = logging.getLogger('test')
-project = corpint.project('test')
+db_uri = 'sqlite:///test.sqlite3'
+project = corpint.project('test', db_uri)
 
 log.info("Creating sample entity...")
 origin = project.origin('luke')
