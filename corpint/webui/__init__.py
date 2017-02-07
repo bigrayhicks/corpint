@@ -17,4 +17,4 @@ def run_webui(project):
     app.deduper, data = create_deduper(project)
     # TODO: do we need this?
     train_dedupe(app.deduper)
-    app.run()
+    app.run(host='0.0.0.0')
