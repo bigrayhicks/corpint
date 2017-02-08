@@ -1,22 +1,25 @@
 import fingerprints
 from normality import ascii_text
 from sqlalchemy import Unicode
+from pprint import pprint  # noqa
 import dedupe
 
+from corpint.schema import TYPES
 from corpint.integrate.util import get_judged, merkle
 from corpint.util import ensure_column
 
-
+NTYPES = [t for t in TYPES if t is not None]
 VARIABLES = [
-    {'field': 'uid', 'type': 'Exists', 'has missing': False},
+    {'field': 'uid', 'type': 'Exact', 'has missing': False},
     {'field': 'name', 'type': 'String', 'has missing': False},
-    {'field': 'type', 'type': 'Exact', 'has missing': True},
-    {'field': 'fingerprint', 'type': 'String', 'has missing': True},
+    {'field': 'type', 'type': 'Categorical', 'variable name': 'type', 'has missing': True, 'categories': NTYPES},
+    {'field': 'fingerprint', 'type': 'String', 'variable name': 'fp', 'has missing': True},
     {'field': 'origin', 'type': 'Exact', 'has missing': False},
     {'field': 'dob', 'type': 'String', 'has missing': True},
     {'field': 'incorporation_date', 'type': 'String', 'has missing': True},
     {'field': 'country', 'type': 'Exact', 'has missing': True},
     {'field': 'address', 'type': 'Address', 'has missing': True},
+    {'type': 'Interaction', 'interaction variables': ['fp', 'type']}
 ]
 
 
@@ -52,7 +55,7 @@ def get_trainset(project, judgement, data):
 
 
 def create_deduper(project):
-    deduper = dedupe.Dedupe(VARIABLES)
+    deduper = dedupe.Dedupe(VARIABLES, num_cores=1)
     data = {e['uid']: to_record(e) for e in project.entities}
     if len(data):
         deduper.sample(data)
@@ -81,21 +84,16 @@ def train_dedupe(deduper):
     try:
         deduper.train()
         return True
-    except ValueError as ve:
+    except ValueError:
         return False
 
 
 def canonicalise(project):
-    deduper, data = create_deduper(project)
-    if not train_dedupe(deduper):
-        return
-    threshold = deduper.threshold(data, recall_weight=1)
-
     updates = (
         (project.entities, 'uid', 'uid_canonical'),
         (project.aliases, 'uid', 'uid_canonical'),
         (project.links, 'source', 'source_canonical'),
-        (project.entities, 'target', 'target_canonical'),
+        (project.links, 'target', 'target_canonical'),
     )
 
     for (table, src, dest) in updates:
@@ -104,12 +102,20 @@ def canonicalise(project):
         table.create_index([dest])
         project.db.query("UPDATE %s SET %s = %s;" % (table.table.name, dest, src))  # noqa
 
-    for (uids, scores) in deduper.match(data, threshold):
+    deduper, data = create_deduper(project)
+    if not train_dedupe(deduper):
+        return
+    deduper.cleanupTraining()
+    threshold = deduper.threshold(data, recall_weight=4)
+    threshold = min(.8, threshold)
+    blocks = deduper.match(data, threshold)
+    for (uids, scores) in blocks:
         canon = merkle(uids)
+        uids = ', '.join(["'%s'" % u for u in uids])
         for (table, src, dest) in updates:
-            query = "UPDATE %s SET %s = '%s' WHERE %s IN :uids"
-            query = query % (table.table.name, dest, canon, src)
-            project.db.query(query, uids=uids)
+            query = "UPDATE %s SET %s = '%s' WHERE %s IN (%s)"
+            query = query % (table.table.name, dest, canon, src, uids)
+            project.db.query(query)
 
 
 def run_dedupe(project):

@@ -97,8 +97,8 @@ class Project(object):
             'judgement': True
         }, ['left_uid', 'right_uid'])
 
-    def integrate(self, auto_match=False):
-        integrate(self, auto_match=auto_match)
+    def integrate(self):
+        integrate(self)
 
     def iter_merged_entities(self):
         for entity in merge_entities(self):
