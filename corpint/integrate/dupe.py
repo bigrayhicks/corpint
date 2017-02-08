@@ -11,15 +11,14 @@ from corpint.util import ensure_column
 NTYPES = [t for t in TYPES if t is not None]
 VARIABLES = [
     {'field': 'uid', 'type': 'Exact', 'has missing': False},
-    {'field': 'name', 'type': 'String', 'has missing': False},
-    {'field': 'type', 'type': 'Categorical', 'variable name': 'type', 'has missing': True, 'categories': NTYPES},
-    {'field': 'fingerprint', 'type': 'String', 'variable name': 'fp', 'has missing': True},
-    {'field': 'origin', 'type': 'Exact', 'has missing': False},
-    {'field': 'dob', 'type': 'String', 'has missing': True},
-    {'field': 'incorporation_date', 'type': 'String', 'has missing': True},
+    {'field': 'name', 'type': 'String', 'has missing': False, 'crf': True},
+    {'field': 'type', 'type': 'Exact', 'has missing': True},
+    # {'field': 'fingerprint', 'type': 'String', 'has missing': True},
+    # {'field': 'origin', 'type': 'Exact', 'has missing': False},
+    {'field': 'date', 'type': 'ShortString', 'has missing': True},
     {'field': 'country', 'type': 'Exact', 'has missing': True},
     {'field': 'address', 'type': 'Address', 'has missing': True},
-    {'type': 'Interaction', 'interaction variables': ['fp', 'type']}
+    # {'type': 'Interaction', 'interaction variables': ['fp', 'type']}
 ]
 
 
@@ -30,15 +29,15 @@ def strconv(text):
 
 
 def to_record(entity):
-    fp = fingerprints.generate(entity.get('name'))
+    # fp = fingerprints.generate(entity.get('name'))
+    date = entity.get('incorporation_date') or entity.get('dob')
     return {
         'uid': entity.get('uid'),
         'name': strconv(entity.get('name')),
         'type': entity.get('type'),
-        'fingerprint': fp,
-        'origin': entity.get('origin'),
-        'dob': strconv(entity.get('dob')),
-        'incorporation_date': strconv(entity.get('incorporation_date')),
+        # 'fingerprint': fp,
+        # 'origin': entity.get('origin'),
+        'date': date,
         'country': entity.get('country'),
         'address': strconv(entity.get('address'))
     }
@@ -55,7 +54,7 @@ def get_trainset(project, judgement, data):
 
 
 def create_deduper(project):
-    deduper = dedupe.Dedupe(VARIABLES, num_cores=1)
+    deduper = dedupe.Dedupe(VARIABLES, num_cores=4)
     data = {e['uid']: to_record(e) for e in project.entities}
     if len(data):
         deduper.sample(data)
